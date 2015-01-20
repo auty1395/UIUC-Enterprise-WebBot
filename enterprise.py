@@ -222,7 +222,7 @@ class UIUCEnterpriseWebBot:
             self.found_td = False
             self.found_tr = False
             self.found_a = False
-
+            self.column_index = 0
             self.list_crn = []
             self.list_avail = []
 
@@ -231,22 +231,16 @@ class UIUCEnterpriseWebBot:
                 for a in attr:
                     if a[0] == 'class' and a[1] == 'datadisplaytable':
                         self.found_table = True
+                        self.column_index = 0
 
             if self.found_table and tag == 'tr':
                 self.found_tr = True
+                self.column_index = 0
 
             if self.found_table and tag == 'td':
                 for a in attr:
                     if a[0] == 'class' and a[1] == 'dddefault':
                         self.found_td = True
-
-            if self.found_table and self.found_tr and self.found_td:
-                if tag == 'abbr':
-                    self.list_avail.append(False)
-                    self.found_tr = False
-                elif tag == 'input':
-                    self.list_avail.append(True)
-                    self.found_tr = False
 
             if self.found_table and self.found_td and tag == 'a':
                 self.found_a = True
@@ -255,12 +249,23 @@ class UIUCEnterpriseWebBot:
             if self.found_a:
                 self.list_crn.append(data.strip('\n'))
                 self.found_a = False
+            if self.found_td and self.found_tr and self.found_table and self.column_index == 12:
+                #print "vacancies=" + data
+                if int(data) > 0:
+                    self.list_avail.append(True)
+                    self.found_tr = False
+                else:
+                    self.list_avail.append(False)
+                    self.found_tr = False
 
         def handle_endtag(self, tag):
             if tag == 'table':
                 self.found_table = False
             if self.found_table and tag == 'td':
                 self.found_td = False
+                self.column_index += 1
+            if tag == 'tr':
+                self.column_index = 0
 
     def _get_majors_page(self, term_in):
         s = self.session
