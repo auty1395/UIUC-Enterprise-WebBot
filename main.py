@@ -4,7 +4,7 @@ import time
 
 
 def notify(query):
-    print "Attn: " + query['crn'] + " is now available!"
+    print "\aAttn: " + query['crn'] + " is now available!"
 
 
 def main():
@@ -52,17 +52,18 @@ def main():
 
         # sleep for 30 seconds so that we don't bog down the UIUC enterprise
         # server. Please do not remove this line or reduce the time.
-        time.sleep(30)
-
-        for query in queries:
-            classes = \
-                ss.get_classes(major=query['major'], course=query['course'])
-
-            print query['crn'] + ": " + str(classes[query['crn']])
-
-            if classes[query['crn']]:
-                notify(query)
-                completed.append(query)
+        time.sleep(5)
+        while 1:
+            for query in queries:
+                print "getting classes..\n"
+                classes = \
+                 ss.get_classes(major=query['major'], course=query['course'])
+    
+                print query['crn'] + ": " + str(classes[query['crn']])
+                 
+                if classes[query['crn']]:
+                  notify(query)
+                  completed.append(query)
 
     print "Done!"
 
